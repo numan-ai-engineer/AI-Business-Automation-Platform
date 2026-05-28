@@ -192,7 +192,7 @@ This project demonstrates:
 
 # 👨‍💻 Developer
 
-## Waqar Ali
+## NUMAN ISHAQ
 
 GitHub:
 https://github.com/numan-ai-engineer
