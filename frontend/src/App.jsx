@@ -1,65 +1,72 @@
 import { useState } from "react";
+import Dashboard from "./Dashboard";
 
 function App() {
+  const token = localStorage.getItem("token");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
   const loginUser = async () => {
-
     try {
-
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
+      const res = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email,
+            password
+          })
+        }
+      );
 
       const data = await res.json();
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-        setMessage("Login Successful 🚀");
+        window.location.reload();
       } else {
         setMessage(data.message);
       }
-
     } catch (error) {
       setMessage("Server Error");
     }
-
   };
+
+  if (token) {
+    return <Dashboard />;
+  }
 
   return (
     <div style={{ padding: "50px" }}>
-
-      <h1>Login Page</h1>
+      <h1>AI Business Automation Platform</h1>
 
       <input
         placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
       />
-      <br /><br />
+
+      <br />
+      <br />
 
       <input
         type="password"
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <br /><br />
+
+      <br />
+      <br />
 
       <button onClick={loginUser}>
         Login
       </button>
 
       <p>{message}</p>
-
     </div>
   );
 }
