@@ -8,21 +8,42 @@ function App() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const loginUser = async () => {
+  if (token) {
+    return <Dashboard />;
+  }
+
+  const register = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:5000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            password
-          })
-        }
-      );
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+      setMessage(data.message);
+    } catch (error) {
+      setMessage("Server Error");
+    }
+  };
+
+  const login = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
       const data = await res.json();
 
@@ -37,17 +58,26 @@ function App() {
     }
   };
 
-  if (token) {
-    return <Dashboard />;
-  }
-
   return (
-    <div style={{ padding: "50px" }}>
-      <h1>AI Business Automation Platform</h1>
+    <div
+      style={{
+        padding: "40px",
+        textAlign: "center",
+      }}
+    >
+      <h1>🚀 AI Business Automation Platform</h1>
+
+      <h2>Login / Register</h2>
 
       <input
-        placeholder="Email"
+        type="email"
+        placeholder="Enter Email"
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
+        style={{
+          padding: "10px",
+          width: "250px",
+        }}
       />
 
       <br />
@@ -55,14 +85,36 @@ function App() {
 
       <input
         type="password"
-        placeholder="Password"
+        placeholder="Enter Password"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
+        style={{
+          padding: "10px",
+          width: "250px",
+        }}
       />
 
       <br />
       <br />
 
-      <button onClick={loginUser}>
+      <button
+        onClick={register}
+        style={{
+          padding: "10px 20px",
+          marginRight: "10px",
+          cursor: "pointer",
+        }}
+      >
+        Register
+      </button>
+
+      <button
+        onClick={login}
+        style={{
+          padding: "10px 20px",
+          cursor: "pointer",
+        }}
+      >
         Login
       </button>
 
