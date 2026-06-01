@@ -5,26 +5,25 @@ const cors = require("cors");
 
 const app = express();
 
-// middleware
 app.use(cors());
 app.use(express.json());
 
 console.log("🚀 Server starting...");
 
 // ----------------------
-// MEMORY DATABASE (NO MONGO)
+// MEMORY DATABASE
 // ----------------------
 let history = [];
 
 // ----------------------
-// BASIC ROUTE
+// BASE ROUTE
 // ----------------------
 app.get("/", (req, res) => {
   res.send("AI SaaS Backend Running 🚀");
 });
 
 // ----------------------
-// AUTH (MOCK)
+// AUTH
 // ----------------------
 app.post("/api/auth/register", (req, res) => {
   const { email, password } = req.body;
@@ -58,18 +57,13 @@ app.post("/api/auth/login", (req, res) => {
 app.post("/api/ai/generate", (req, res) => {
   const { prompt } = req.body;
 
-  if (!prompt) {
-    return res.status(400).json({ message: "Prompt required" });
-  }
-
   const result = `
-🔥 AI GENERATED CONTENT
+🔥 AI CONTENT
 
 Topic: ${prompt}
 
 👉 ${prompt} is a powerful business idea.
 👉 AI can automate this easily.
-👉 You can build SaaS around it.
 `;
 
   history.push({
@@ -83,45 +77,25 @@ Topic: ${prompt}
 });
 
 // ----------------------
-// AI BUSINESS IDEA GENERATOR
+// BUSINESS IDEA GENERATOR
 // ----------------------
 app.post("/api/ai/business-idea", (req, res) => {
   const { budget } = req.body;
 
-  if (!budget) {
-    return res.status(400).json({
-      message: "Budget is required",
-    });
-  }
-
   const result = `
-💡 AI BUSINESS IDEAS
+💡 BUSINESS IDEAS
 
-Budget: ${budget} PKR
+Budget: ${budget}
 
-1️⃣ Software House
-- Web Development Services
-- Mobile App Development
-- AI Automation Solutions
-
-2️⃣ Digital Marketing Agency
-- Social Media Management
-- SEO Services
-- Content Creation
-
-3️⃣ E-Commerce Store
-- Online Products
-- Dropshipping
-- Local Brand Building
-
-Estimated Monthly Potential:
-50,000 - 300,000+ PKR
+1. Software House
+2. Digital Agency
+3. E-Commerce Store
 `;
 
   history.push({
     id: Date.now(),
     type: "business",
-    prompt: `Budget: ${budget}`,
+    prompt: budget,
     result,
   });
 
@@ -129,17 +103,47 @@ Estimated Monthly Potential:
 });
 
 // ----------------------
-// HISTORY API
+// EMAIL WRITER (NEW)
+// ----------------------
+app.post("/api/ai/email", (req, res) => {
+  const { purpose, tone } = req.body;
+
+  const result = `
+📧 AI GENERATED EMAIL
+
+Subject: Regarding ${purpose}
+
+Dear Sir/Madam,
+
+I hope you are doing well.
+
+I am writing regarding ${purpose}.
+My tone is ${tone} and I would like to express my interest.
+
+Thank you for your time.
+
+Best Regards,
+[Your Name]
+`;
+
+  history.push({
+    id: Date.now(),
+    type: "email",
+    prompt: `${purpose} | ${tone}`,
+    result,
+  });
+
+  res.json({ result });
+});
+
+// ----------------------
+// HISTORY
 // ----------------------
 app.get("/api/ai/history", (req, res) => {
   res.json(history);
 });
 
 // ----------------------
-// START SERVER
-// ----------------------
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
 });
