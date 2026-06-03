@@ -1,4 +1,14 @@
 # 🚀 AI Business Automation Platform
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
+![Vite](https://img.shields.io/badge/Vite-8-purple?logo=vite)
+![Node.js](https://img.shields.io/badge/Node.js-Backend-green?logo=node.js)
+![Express](https://img.shields.io/badge/Express.js-API-black?logo=express)
+![JWT](https://img.shields.io/badge/JWT-Authentication-orange)
+![Status](https://img.shields.io/badge/Status-Active-success)
+![GitHub last commit](https://img.shields.io/github/last-commit/numan-ai-engineer/AI-Business-Automation-Platform)
+![GitHub repo size](https://img.shields.io/github/repo-size/numan-ai-engineer/AI-Business-Automation-Platform)
+![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/YOUR_REPO?style=social)
+
 
 A modern full-stack AI SaaS platform built with the MERN Stack, secure JWT authentication, and scalable backend architecture.
 
