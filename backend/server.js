@@ -2,52 +2,113 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
+// ----------------------
+// MIDDLEWARE
+// ----------------------
 app.use(cors());
 app.use(express.json());
 
-console.log("🚀 Server starting...");
+console.log("🚀 AI SaaS Backend Starting...");
 
 // ----------------------
-// MEMORY DATABASE
+// SECRET KEY
 // ----------------------
+const JWT_SECRET = "ai_saas_secret_key_123";
+
+// ----------------------
+// MEMORY DATABASE (TEMP)
+// ----------------------
+let users = [];
 let history = [];
 
 // ----------------------
-// BASE ROUTE
+// HOME ROUTE
 // ----------------------
 app.get("/", (req, res) => {
   res.send("AI SaaS Backend Running 🚀");
 });
 
 // ----------------------
-// AUTH
+// JWT MIDDLEWARE (PROTECTION)
 // ----------------------
-app.post("/api/auth/register", (req, res) => {
-  const { email, password } = req.body;
+function auth(req, res, next) {
+  const token = req.headers.authorization;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email & password required" });
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  res.json({
-    message: "User registered successfully 🚀",
-    user: { email },
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+}
+
+// ----------------------
+// REGISTER API
+// ----------------------
+app.post("/api/auth/register", (req, res) => {
+  const { email, password, firstName, lastName, phone, country } = req.body;
+
+  const userExists = users.find((u) => u.email === email);
+
+  if (userExists) {
+    return res.status(400).json({ message: "User already exists" });
+  }
+
+  users.push({
+    id: Date.now(),
+    email,
+    password,
+    firstName,
+    lastName,
+    phone,
+    country,
   });
+
+  res.json({ message: "User registered successfully 🚀" });
 });
 
+// ----------------------
+// LOGIN API (JWT)
+// ----------------------
 app.post("/api/auth/login", (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email & password required" });
+  const user = users.find(
+    (u) => u.email === email && u.password === password
+  );
+
+  if (!user) {
+    return res.status(400).json({ message: "Invalid credentials" });
   }
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
 
   res.json({
     message: "Login successful 🚀",
-    token: "demo-token-123",
+    token,
+  });
+});
+
+// ----------------------
+// PROTECTED DASHBOARD API
+// ----------------------
+app.get("/api/dashboard", auth, (req, res) => {
+  res.json({
+    message: "Welcome to protected dashboard 🚀",
+    user: req.user,
   });
 });
 
@@ -57,13 +118,18 @@ app.post("/api/auth/login", (req, res) => {
 app.post("/api/ai/generate", (req, res) => {
   const { prompt } = req.body;
 
+  if (!prompt) {
+    return res.status(400).json({ message: "Prompt required" });
+  }
+
   const result = `
-🔥 AI CONTENT
+🔥 AI GENERATED CONTENT
 
 Topic: ${prompt}
 
-👉 ${prompt} is a powerful business idea.
-👉 AI can automate this easily.
+👉 ${prompt} is a powerful idea
+👉 You can build SaaS around it
+👉 AI can automate this process
 `;
 
   history.push({
@@ -77,7 +143,7 @@ Topic: ${prompt}
 });
 
 // ----------------------
-// BUSINESS IDEA GENERATOR
+// BUSINESS IDEA API
 // ----------------------
 app.post("/api/ai/business-idea", (req, res) => {
   const { budget } = req.body;
@@ -85,11 +151,14 @@ app.post("/api/ai/business-idea", (req, res) => {
   const result = `
 💡 BUSINESS IDEAS
 
-Budget: ${budget}
+Budget: ${budget} PKR
 
-1. Software House
-2. Digital Agency
-3. E-Commerce Store
+1. SaaS Startup
+2. AI Automation Agency
+3. E-commerce Store
+4. Freelancing Agency
+
+🔥 High profit potential in 3–6 months
 `;
 
   history.push({
@@ -103,7 +172,7 @@ Budget: ${budget}
 });
 
 // ----------------------
-// EMAIL WRITER (NEW)
+// EMAIL GENERATOR API
 // ----------------------
 app.post("/api/ai/email", (req, res) => {
   const { purpose, tone } = req.body;
@@ -111,25 +180,23 @@ app.post("/api/ai/email", (req, res) => {
   const result = `
 📧 AI GENERATED EMAIL
 
-Subject: Regarding ${purpose}
+Purpose: ${purpose}
+Tone: ${tone}
 
-Dear Sir/Madam,
+Hello,
 
 I hope you are doing well.
 
-I am writing regarding ${purpose}.
-My tone is ${tone} and I would like to express my interest.
+This email is regarding ${purpose}.
 
-Thank you for your time.
-
-Best Regards,
-[Your Name]
+Kind regards,
+AI Assistant
 `;
 
   history.push({
     id: Date.now(),
     type: "email",
-    prompt: `${purpose} | ${tone}`,
+    prompt: purpose,
     result,
   });
 
@@ -137,13 +204,17 @@ Best Regards,
 });
 
 // ----------------------
-// HISTORY
+// HISTORY API
 // ----------------------
 app.get("/api/ai/history", (req, res) => {
   res.json(history);
 });
 
 // ----------------------
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+// START SERVER
+// ----------------------
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });

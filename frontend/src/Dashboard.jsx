@@ -1,32 +1,27 @@
 import { useState, useEffect } from "react";
+import "./dashboard.css";
 
 function Dashboard() {
   const [page, setPage] = useState("dashboard");
 
-  // AI CONTENT
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
 
-  // BUSINESS
   const [budget, setBudget] = useState("");
   const [businessResult, setBusinessResult] = useState("");
 
-  // EMAIL WRITER (NEW)
   const [emailPurpose, setEmailPurpose] = useState("");
   const [emailTone, setEmailTone] = useState("");
   const [emailResult, setEmailResult] = useState("");
 
-  // HISTORY
   const [history, setHistory] = useState([]);
 
   const logout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
+  localStorage.removeItem("token");
+  window.location.href = "/";
+};
 
-  // ----------------------
-  // AI GENERATE
-  // ----------------------
+  // AI GENERATOR
   const generate = async () => {
     const res = await fetch("http://localhost:5000/api/ai/generate", {
       method: "POST",
@@ -36,12 +31,10 @@ function Dashboard() {
 
     const data = await res.json();
     setResult(data.result);
-    loadHistory();
+    setHistory(await (await fetch("http://localhost:5000/api/ai/history")).json());
   };
 
-  // ----------------------
   // BUSINESS IDEA
-  // ----------------------
   const generateBusinessIdea = async () => {
     const res = await fetch("http://localhost:5000/api/ai/business-idea", {
       method: "POST",
@@ -51,12 +44,10 @@ function Dashboard() {
 
     const data = await res.json();
     setBusinessResult(data.result);
-    loadHistory();
+    setHistory(await (await fetch("http://localhost:5000/api/ai/history")).json());
   };
 
-  // ----------------------
   // EMAIL GENERATOR
-  // ----------------------
   const generateEmail = async () => {
     const res = await fetch("http://localhost:5000/api/ai/email", {
       method: "POST",
@@ -69,57 +60,53 @@ function Dashboard() {
 
     const data = await res.json();
     setEmailResult(data.result);
-    loadHistory();
-  };
-
-  // ----------------------
-  // HISTORY
-  // ----------------------
-  const loadHistory = async () => {
-    const res = await fetch("http://localhost:5000/api/ai/history");
-    const data = await res.json();
-    setHistory(data);
+    setHistory(await (await fetch("http://localhost:5000/api/ai/history")).json());
   };
 
   useEffect(() => {
-    loadHistory();
+    fetch("http://localhost:5000/api/ai/history")
+      .then((res) => res.json())
+      .then((data) => setHistory(data));
   }, []);
 
   return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "Arial" }}>
-      
+    <div className="app">
+
       {/* SIDEBAR */}
-      <div style={{ width: "240px", backgroundColor: "#111", color: "white", padding: "20px" }}>
-        <h2>🚀 SaaS AI</h2>
+      <div className="sidebar">
+        <h2>🚀 AI SaaS</h2>
 
-        <p onClick={() => setPage("dashboard")} style={{ cursor: "pointer" }}>📊 Dashboard</p>
-        <p onClick={() => setPage("ai")} style={{ cursor: "pointer" }}>🤖 AI Generator</p>
-        <p onClick={() => setPage("business")} style={{ cursor: "pointer" }}>💡 Business Ideas</p>
-        <p onClick={() => setPage("email")} style={{ cursor: "pointer" }}>📧 Email Writer</p>
-        <p onClick={() => setPage("history")} style={{ cursor: "pointer" }}>📜 History</p>
+        <button onClick={() => setPage("dashboard")}>📊 Dashboard</button>
+        <button onClick={() => setPage("ai")}>🤖 AI Generator</button>
+        <button onClick={() => setPage("business")}>💡 Business Ideas</button>
+        <button onClick={() => setPage("email")}>📧 Email Writer</button>
+        <button onClick={() => setPage("history")}>📜 History</button>
 
-        <hr />
-
-        <p onClick={logout} style={{ cursor: "pointer", color: "red" }}>🚪 Logout</p>
+        <button className="logout" onClick={logout}>🚪 Logout</button>
       </div>
 
-      {/* MAIN */}
-      <div style={{ flex: 1, padding: "30px", overflowY: "auto" }}>
+      {/* MAIN CONTENT */}
+      <div className="main">
 
         {/* DASHBOARD */}
         {page === "dashboard" && (
-          <div>
-            <h1>Dashboard</h1>
-            <p>AI SaaS Platform 🚀</p>
+          <div className="card">
+            <h1>AI Business Automation Platform 🚀</h1>
+            <p>Welcome to your SaaS Dashboard</p>
           </div>
         )}
 
         {/* AI */}
         {page === "ai" && (
-          <div>
+          <div className="card">
             <h1>🤖 AI Generator</h1>
 
-            <input value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+            <input
+              placeholder="Enter prompt..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+            />
+
             <button onClick={generate}>Generate</button>
 
             <pre>{result}</pre>
@@ -128,10 +115,15 @@ function Dashboard() {
 
         {/* BUSINESS */}
         {page === "business" && (
-          <div>
+          <div className="card">
             <h1>💡 Business Ideas</h1>
 
-            <input value={budget} onChange={(e) => setBudget(e.target.value)} />
+            <input
+              placeholder="Enter budget..."
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+            />
+
             <button onClick={generateBusinessIdea}>Generate</button>
 
             <pre>{businessResult}</pre>
@@ -140,7 +132,7 @@ function Dashboard() {
 
         {/* EMAIL */}
         {page === "email" && (
-          <div>
+          <div className="card">
             <h1>📧 Email Writer</h1>
 
             <input
@@ -163,11 +155,11 @@ function Dashboard() {
 
         {/* HISTORY */}
         {page === "history" && (
-          <div>
+          <div className="card">
             <h1>📜 History</h1>
 
             {history.map((h) => (
-              <div key={h.id}>
+              <div key={h.id} className="history-item">
                 <b>{h.type}</b>
                 <p>{h.prompt}</p>
                 <pre>{h.result}</pre>
